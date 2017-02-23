@@ -1,6 +1,6 @@
 JD Flight
 ===============
-
+项目基于 tp5，不含框架源码，cron 15min 执行一次```php think cron```，cron 文件在`application/console/Cron.php`，含机票经销商 filter 说明。
 数据库结构：
 ```
 -- phpMyAdmin SQL Dump
