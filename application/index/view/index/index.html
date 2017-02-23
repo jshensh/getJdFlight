@@ -1,0 +1,115 @@
+{extend name="layout" /}
+
+{block name="title"}图表{/block}
+
+{block name="content"}
+        <div class="container-fiuld" id="main" style="padding: 20px 20px 0 20px;"></div>
+{/block}
+
+{block name="css"}
+
+{/block}
+
+{block name="javascript"}
+    <script>
+        $(function() {
+            Highcharts.setOptions({
+                global: {
+                    timezoneOffset: -8 * 60
+                }
+            });
+            $(window).resize(function() {
+                $(".chart").css("height", ($(window).height() - 70) + "px");
+            });
+            var createContainer = function(to, title, data) {
+                var div = $('<div />').css({
+                        "height": ($(window).height() - 70) + "px"
+                    }).addClass("chart");
+                $(to).append(
+                    $('<div />').addClass("panel panel-default").append(
+                        $('<div />').addClass("panel-body").append(div)
+                    )
+                );
+                div.highcharts({
+                    chart: {
+                        type: 'spline'
+                    },
+                    chart: {
+                        zoomType: 'x'
+                    },
+                    title: {
+                        text: title
+                    },
+                    plotOptions: {
+                        series: {
+                            lineWidth: 1.5,
+                            marker: {
+                                radius: 2
+                            }
+                        }
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            millisecond: '%Y-%m-%d %H:%M:%S.%L',
+                            second: '%Y-%m-%d %H:%M:%S',
+                            minute: '%Y-%m-%d %H:%M',
+                            hour: '%Y-%m-%d %H:%M',
+                            day: '%Y-%m-%d',
+                            week: '%Y-%m-%d',
+                            month: '%Y-%m',
+                            year: '%Y'
+                        }
+                    },
+                    tooltip: {
+                        dateTimeLabelFormats: {
+                            millisecond: '%Y-%m-%d %H:%M:%S.%L',
+                            second: '%Y-%m-%d %H:%M:%S',
+                            minute: '%Y-%m-%d %H:%M',
+                            hour: '%Y-%m-%d %H:%M',
+                            day: '%Y-%m-%d',
+                            week: '%Y-%m-%d',
+                            month: '%Y-%m',
+                            year: '%Y'
+                        },
+                        split: true,
+                        padding: 2
+                    },
+                    yAxis: {
+                        title: {
+                            text: '报价'
+                        }
+                    },
+                    series: data,
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        borderWidth: 0
+                    },
+                    exporting: {
+                        enabled: false
+                    }
+                });
+            };
+
+            var chartData = {$chartData}, container = {};
+            for (var i = 0; i < chartData.length; i++) {
+                container[chartData[i]["arr_date"]] === void 0 && (container[chartData[i]["arr_date"]] = {});
+                container[chartData[i]["arr_date"]]["series"] === void 0 && (container[chartData[i]["arr_date"]]["series"] = {});
+                container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]] === void 0 && (container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]] = []);
+                container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]].push([~~chartData[i]["create_at"] * 1000, ~~chartData[i]["price"]]);
+            }
+            for (var i in container) {
+                var tmp = [];
+                for (var j in container[i]["series"]) {
+                    tmp.push({"name": j, "data": container[i]["series"][j]});
+                }
+                container[i]["series"] = tmp;
+            }
+            for (var i in container) {
+                createContainer("#main", i, container[i]["series"]);
+            }
+        });
+    </script>
+{/block}
