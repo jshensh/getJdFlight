@@ -1,4 +1,6 @@
 <?php
+namespace app\common\controller;
+
 class CustomCurlStatement
 {
     private $ch = null,
