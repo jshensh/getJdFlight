@@ -18,11 +18,12 @@ class Flight
             "query.queryType" => $queryData["queryType"],
             "query.lineType" => $queryData["lineType"]
         ];
-        $curlSet = CustomCurl::init('https://jipiao.jd.com/search/queryFlight.action?' . http_build_query($queryData))
+        $curlObj = CustomCurl::init('https://jipiao.jd.com/search/queryFlight.action?' . http_build_query($queryData))
                     ->set('referer', 'https://jipiao.jd.com/ticketquery/flightSearch.action?' . http_build_query(array_merge($refererData, $refererQueryData)))
-                    ->setHeader('X-Requested-With', 'XMLHttpRequest');
-        $curlObj = $curlSet->exec();
-        if ($curlObj) {
+                    ->setCookie('captcha_check_pass_jipiao', '3fb993b51aa26a86af38144888a7ee3e')
+                    ->setHeader('X-Requested-With', 'XMLHttpRequest')
+                    ->exec();
+        if ($curlObj->getStatus()) {
             $jsonObj = json_decode($curlObj->getBody(), 1);
             if ($jsonObj) {
                 return $jsonObj;

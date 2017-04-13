@@ -59,7 +59,13 @@
                             week: '%Y-%m-%d',
                             month: '%Y-%m',
                             year: '%Y'
-                        }
+                        }/*,
+                        breaks: {
+                            breakSize: 1,
+                            from: 64,
+                            to: 96,
+                            repeat: 64
+                        }*/
                     },
                     tooltip: {
                         dateTimeLabelFormats: {
@@ -93,12 +99,28 @@
                 });
             };
 
-            var chartData = {$chartData}, container = {};
+            var chartData = {$chartData}, infoDataRaw = {$infoData}, infoData = {}, container = {}, lastTimestamp = 0;
+            var getContainer = function(depDate, depTime) {
+                return depDate + (depTime ? (" " + (['00:00 ~ 05:59', '06:00 ~ 11:59', '12:00 ~ 17:59', '18:00 ~ 23:59'][~~(~~depTime / 600)])) : '');
+            };
+            for (var i = 0; i < infoDataRaw.length; i++) {
+                infoData[infoDataRaw[i]["dep_date"]] === void 0 && (infoData[infoDataRaw[i]["dep_date"]] = {});
+                infoData[infoDataRaw[i]["dep_date"]][infoDataRaw[i]["flight_no"]] = infoDataRaw[i]["dep_time"];
+                container[getContainer(infoDataRaw[i]["dep_date"], infoDataRaw[i]["dep_time"])] === void 0 && (container[getContainer(infoDataRaw[i]["dep_date"], infoDataRaw[i]["dep_time"])] = {});
+            }
+            var getDepTime = function(depDate, flightNo) {
+                return infoData[depDate] !== void 0 && infoData[depDate][flightNo] !== void 0 ? infoData[depDate][flightNo] : false;
+            };
             for (var i = 0; i < chartData.length; i++) {
-                container[chartData[i]["arr_date"]] === void 0 && (container[chartData[i]["arr_date"]] = {});
-                container[chartData[i]["arr_date"]]["series"] === void 0 && (container[chartData[i]["arr_date"]]["series"] = {});
-                container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]] === void 0 && (container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]] = []);
-                container[chartData[i]["arr_date"]]["series"][chartData[i]["flight_no"]].push([~~chartData[i]["create_at"] * 1000, ~~chartData[i]["price"]]);
+                var depDate = chartData[i]["dep_date"],
+                    flightNo = chartData[i]["flight_no"],
+                    depTime = getDepTime(depDate, flightNo),
+                    containerTitle = getContainer(depDate, depTime),
+                    flightNoAndDepTime = flightNo + (depTime ? (' ' + (depTime.substr(0, 2)) + ':' + (depTime.substr(-2))) : '');
+                container[containerTitle] === void 0 && (container[containerTitle] = {});
+                container[containerTitle]["series"] === void 0 && (container[containerTitle]["series"] = {});
+                container[containerTitle]["series"][flightNoAndDepTime] === void 0 && (container[containerTitle]["series"][flightNoAndDepTime] = []);
+                container[containerTitle]["series"][flightNoAndDepTime].push([~~chartData[i]["create_at"] * 1000, ~~chartData[i]["price"]]);
             }
             for (var i in container) {
                 var tmp = [];
